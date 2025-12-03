@@ -5,6 +5,7 @@ import {
     collection,
     addDoc,
     deleteDoc,
+    updateDoc,
     doc,
     query,
     where,
@@ -73,6 +74,18 @@ export const useFirestore = (collectionName) => {
         }
     };
 
+    const updateDocument = async (id, docData) => {
+        try {
+            await updateDoc(doc(db, collectionName, id), {
+                ...docData,
+                updatedAt: serverTimestamp()
+            });
+        } catch (err) {
+            console.error("Error updating document:", err);
+            throw err;
+        }
+    };
+
     const deleteDocument = async (id) => {
         try {
             await deleteDoc(doc(db, collectionName, id));
@@ -82,5 +95,5 @@ export const useFirestore = (collectionName) => {
         }
     };
 
-    return { docs, addDocument, deleteDocument, loading, error };
+    return { docs, addDocument, updateDocument, deleteDocument, loading, error };
 };
