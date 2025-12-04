@@ -5,6 +5,7 @@ export const useGemini = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [result, setResult] = useState(null);
+    const [conversationHistory, setConversationHistory] = useState([]);
 
     const analyzeJobDescription = async (jobText) => {
         setLoading(true);
@@ -124,12 +125,65 @@ Format your response as a structured list of actionable recommendations.`;
         }
     };
 
+    const chatWithAI = async (userMessage, context = '') => {
+        setLoading(true);
+        setError(null);
+        try {
+            const model = getModel();
+
+            // Build conversation context
+            let conversationContext = '';
+            if (context) {
+                conversationContext = `Context:\n${context}\n\n`;
+            }
+
+            if (conversationHistory.length > 0) {
+                conversationContext += 'Previous conversation:\n';
+                conversationHistory.forEach(msg => {
+                    conversationContext += `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}\n`;
+                });
+                conversationContext += '\n';
+            }
+
+            const fullPrompt = `${conversationContext}User: ${userMessage}\n\nAssistant:`;
+
+            const result = await model.generateContent(fullPrompt);
+            const response = await result.response;
+            const text = response.text();
+
+            // Update conversation history
+            const newHistory = [
+                ...conversationHistory,
+                { role: 'user', content: userMessage },
+                { role: 'assistant', content: text }
+            ];
+            setConversationHistory(newHistory);
+            setResult(text);
+
+            return text;
+        } catch (err) {
+            console.error("Error in chat:", err);
+            setError(err.message);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const resetConversation = () => {
+        setConversationHistory([]);
+        setResult(null);
+    };
+
     return {
         loading,
         error,
         result,
+        conversationHistory,
         analyzeJobDescription,
         generateCoverLetter,
-        suggestCVImprovements
+        suggestCVImprovements,
+        chatWithAI,
+        resetConversation
     };
 };

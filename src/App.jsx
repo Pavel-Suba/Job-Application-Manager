@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import { Dashboard, Applications, CVManager, Profile } from './pages';
 import { AIAssistant } from './pages/AIAssistant';
+import { CoverLetters } from './pages/CoverLetters';
+import { MasterProfiles } from './pages/MasterProfiles';
 
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -39,6 +41,20 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <AIAssistant />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/cover-letters" element={
+            <ProtectedRoute>
+              <Layout>
+                <CoverLetters />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/master-profiles" element={
+            <ProtectedRoute>
+              <Layout>
+                <MasterProfiles />
               </Layout>
             </ProtectedRoute>
           } />

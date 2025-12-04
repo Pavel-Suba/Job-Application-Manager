@@ -9,7 +9,8 @@
   --text-secondary: #94a3b8;
   --primary: #3b82f6;
   --primary-hover: #2563eb;
-  --accent: #8b5cf6; /* Violet */
+  --accent: #8b5cf6;
+  /* Violet */
   --success: #10b981;
   --danger: #ef4444;
   --border: #334155;
@@ -66,18 +67,51 @@ button {
   padding: 0 var(--space-4);
 }
 
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.items-center { align-items: center; }
-.justify-between { justify-content: space-between; }
-.gap-2 { gap: var(--space-2); }
-.gap-4 { gap: var(--space-4); }
+.flex {
+  display: flex;
+}
 
-.text-sm { font-size: 0.875rem; }
-.text-lg { font-size: 1.125rem; }
-.text-xl { font-size: 1.25rem; font-weight: 600; }
-.text-2xl { font-size: 1.5rem; font-weight: 700; }
-.text-secondary { color: var(--text-secondary); }
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-2 {
+  gap: var(--space-2);
+}
+
+.gap-4 {
+  gap: var(--space-4);
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
 
 .card {
   background-color: var(--bg-surface);
@@ -150,4 +184,21 @@ button {
   font-weight: 500;
   background-color: rgba(59, 130, 246, 0.1);
   color: var(--primary);
+}
+
+/* Select dropdown styling */
+select.input {
+  cursor: pointer;
+}
+
+select.input option {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  padding: var(--space-2);
+}
+
+select.input option:hover,
+select.input option:checked {
+  background-color: var(--primary);
+  color: white;
 }

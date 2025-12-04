@@ -1,24 +1,39 @@
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Layout = ({ children }) => {
   const location = useLocation();
   const { currentUser, logout } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: '📊' },
     { path: '/applications', label: 'Applications', icon: '💼' },
     { path: '/cvs', label: 'CV Manager', icon: '📄' },
+    { path: '/cover-letters', label: 'Cover Letters', icon: '📝' },
+    { path: '/master-profiles', label: 'Master Profiles', icon: '👤' },
     { path: '/ai-assistant', label: 'AI Assistant', icon: '✨' },
-    { path: '/profile', label: 'Master Profile', icon: '👤' },
+    { path: '/profile', label: 'Raw Data', icon: '📋' },
   ];
 
   return (
     <div className="flex" style={{ minHeight: '100vh' }}>
       {/* Sidebar */}
-      <aside style={{ width: '260px', borderRight: '1px solid var(--border)', padding: 'var(--space-6)' }} className="flex-col">
+      <aside
+        style={{
+          width: isSidebarOpen ? '260px' : '0px',
+          borderRight: '1px solid var(--border)',
+          padding: isSidebarOpen ? 'var(--space-6)' : '0',
+          opacity: isSidebarOpen ? 1 : 0,
+          overflow: 'hidden',
+          transition: 'all 0.3s ease',
+          whiteSpace: 'nowrap'
+        }}
+        className="flex-col"
+      >
         <div className="flex items-center gap-2" style={{ marginBottom: 'var(--space-8)' }}>
-          <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--primary), var(--accent))', borderRadius: '8px' }}></div>
+          <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--primary), var(--accent))', borderRadius: '8px', flexShrink: 0 }}></div>
           <h1 className="text-xl">JobManager</h1>
         </div>
 
@@ -74,8 +89,24 @@ const Layout = ({ children }) => {
       </aside>
 
       {/* Main Content */}
-      <main style={{ flex: 1, padding: 'var(--space-8)', overflowY: 'auto' }}>
-        <div className="container">
+      <main style={{ flex: 1, padding: 'var(--space-8)', overflowY: 'auto', position: 'relative' }}>
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          style={{
+            position: 'absolute',
+            top: 'var(--space-4)',
+            left: 'var(--space-4)',
+            background: 'transparent',
+            border: 'none',
+            fontSize: '24px',
+            cursor: 'pointer',
+            zIndex: 10,
+            color: 'var(--text-secondary)'
+          }}
+        >
+          {isSidebarOpen ? '◀' : '▶'}
+        </button>
+        <div className="container" style={{ marginTop: 'var(--space-6)' }}>
           {children}
         </div>
       </main>

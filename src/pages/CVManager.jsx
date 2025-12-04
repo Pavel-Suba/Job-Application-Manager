@@ -11,6 +11,8 @@ export const CVManager = () => {
     const [newCv, setNewCv] = useState({ name: '', role: 'Mendix Dev', lang: 'EN', file: null });
     const [isUploading, setIsUploading] = useState(false);
 
+    const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'table'
+
     const handleUpload = async () => {
         if (!newCv.file) return;
 
@@ -31,11 +33,20 @@ export const CVManager = () => {
                     // Upload completed successfully, now get the download URL
                     const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
 
+                    // Calculate version number
+                    const baseName = `${newCv.role}_${newCv.lang}`;
+                    const existingVersions = cvs.filter(cv =>
+                        cv.baseName === baseName
+                    );
+                    const version = existingVersions.length + 1;
+
                     // Save metadata to Firestore
                     await addDocument({
                         name: newCv.file.name,
                         role: newCv.role,
                         lang: newCv.lang,
+                        baseName: baseName,
+                        version: version,
                         downloadURL: downloadURL,
                         date: new Date().toISOString().split('T')[0]
                     });
@@ -71,9 +82,27 @@ export const CVManager = () => {
         <div className="flex-col gap-4">
             <div className="flex justify-between items-center" style={{ marginBottom: 'var(--space-6)' }}>
                 <h2 className="text-2xl">CV Manager</h2>
-                <button className="btn btn-primary" onClick={() => setShowUpload(!showUpload)}>
-                    + Upload New CV
-                </button>
+                <div className="flex gap-3">
+                    <div className="flex" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 'var(--radius-md)', padding: '2px' }}>
+                        <button
+                            className={`btn ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
+                            style={{ padding: '4px 12px', fontSize: '14px' }}
+                            onClick={() => setViewMode('grid')}
+                        >
+                            Grid
+                        </button>
+                        <button
+                            className={`btn ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
+                            style={{ padding: '4px 12px', fontSize: '14px' }}
+                            onClick={() => setViewMode('table')}
+                        >
+                            Table
+                        </button>
+                    </div>
+                    <button className="btn btn-primary" onClick={() => setShowUpload(!showUpload)}>
+                        + Upload New CV
+                    </button>
+                </div>
             </div>
 
             {showUpload && (
@@ -136,40 +165,104 @@ export const CVManager = () => {
                 </div>
             )}
 
-            <div className="grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'var(--space-4)' }}>
-                {cvs.length === 0 ? (
-                    <p className="text-secondary">No CVs found. Upload one to get started!</p>
+            {cvs.length === 0 ? (
+                <p className="text-secondary">No CVs found. Upload one to get started!</p>
+            ) : (
+                viewMode === 'grid' ? (
+                    <div className="grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'var(--space-4)' }}>
+                        {cvs.map((cv) => (
+                            <div key={cv.id} className="card flex-col gap-2">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex gap-2">
+                                        <div className="badge">{cv.lang}</div>
+                                        {cv.version && (
+                                            <div className="badge" style={{ backgroundColor: 'rgba(59, 130, 246, 0.2)', color: '#3b82f6' }}>
+                                                v{cv.version}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <span className="text-sm text-secondary">{cv.date}</span>
+                                </div>
+                                <h3 className="text-lg" style={{ fontWeight: 500 }}>{cv.role}</h3>
+                                <p className="text-sm text-secondary" style={{ wordBreak: 'break-all' }}>{cv.name}</p>
+                                <div className="flex gap-2" style={{ marginTop: 'var(--space-2)' }}>
+                                    <a
+                                        href={cv.downloadURL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="btn btn-outline"
+                                        style={{ fontSize: '0.8rem', padding: '4px 8px', textDecoration: 'none' }}
+                                    >
+                                        View / Download
+                                    </a>
+                                    <button
+                                        className="btn btn-outline"
+                                        style={{ fontSize: '0.8rem', padding: '4px 8px', borderColor: 'var(--danger)', color: 'var(--danger)' }}
+                                        onClick={() => handleDelete(cv.id)}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 ) : (
-                    cvs.map((cv) => (
-                        <div key={cv.id} className="card flex-col gap-2">
-                            <div className="flex justify-between items-start">
-                                <div className="badge">{cv.lang}</div>
-                                <span className="text-sm text-secondary">{cv.date}</span>
-                            </div>
-                            <h3 className="text-lg" style={{ fontWeight: 500 }}>{cv.role}</h3>
-                            <p className="text-sm text-secondary" style={{ wordBreak: 'break-all' }}>{cv.name}</p>
-                            <div className="flex gap-2" style={{ marginTop: 'var(--space-2)' }}>
-                                <a
-                                    href={cv.downloadURL}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="btn btn-outline"
-                                    style={{ fontSize: '0.8rem', padding: '4px 8px', textDecoration: 'none' }}
-                                >
-                                    View / Download
-                                </a>
-                                <button
-                                    className="btn btn-outline"
-                                    style={{ fontSize: '0.8rem', padding: '4px 8px', borderColor: 'var(--danger)', color: 'var(--danger)' }}
-                                    onClick={() => handleDelete(cv.id)}
-                                >
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
-                    ))
-                )}
-            </div>
+                    <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '1px solid var(--border)', backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                                    <th style={{ padding: 'var(--space-3)', textAlign: 'left' }}>Role</th>
+                                    <th style={{ padding: 'var(--space-3)', textAlign: 'left' }}>Language</th>
+                                    <th style={{ padding: 'var(--space-3)', textAlign: 'left' }}>Filename</th>
+                                    <th style={{ padding: 'var(--space-3)', textAlign: 'left' }}>Date</th>
+                                    <th style={{ padding: 'var(--space-3)', textAlign: 'right' }}>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {cvs.map((cv) => (
+                                    <tr key={cv.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                                        <td style={{ padding: 'var(--space-3)' }}>
+                                            <div className="flex items-center gap-2">
+                                                {cv.role}
+                                                {cv.version && (
+                                                    <span className="badge" style={{ fontSize: '0.7rem', backgroundColor: 'rgba(59, 130, 246, 0.2)', color: '#3b82f6' }}>
+                                                        v{cv.version}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: 'var(--space-3)' }}>
+                                            <span className="badge" style={{ fontSize: '0.8rem' }}>{cv.lang}</span>
+                                        </td>
+                                        <td style={{ padding: 'var(--space-3)', color: 'var(--text-secondary)' }}>{cv.name}</td>
+                                        <td style={{ padding: 'var(--space-3)', color: 'var(--text-secondary)' }}>{cv.date}</td>
+                                        <td style={{ padding: 'var(--space-3)', textAlign: 'right' }}>
+                                            <div className="flex justify-end gap-2">
+                                                <a
+                                                    href={cv.downloadURL}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="btn btn-outline"
+                                                    style={{ fontSize: '0.8rem', padding: '4px 8px', textDecoration: 'none' }}
+                                                >
+                                                    View
+                                                </a>
+                                                <button
+                                                    className="btn btn-outline"
+                                                    style={{ fontSize: '0.8rem', padding: '4px 8px', borderColor: 'var(--danger)', color: 'var(--danger)' }}
+                                                    onClick={() => handleDelete(cv.id)}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )
+            )}
         </div>
     );
 };
