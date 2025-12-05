@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const Layout = ({ children }) => {
   const location = useLocation();
   const { currentUser, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const navItems = [
@@ -32,9 +34,30 @@ const Layout = ({ children }) => {
         }}
         className="flex-col"
       >
-        <div className="flex items-center gap-2" style={{ marginBottom: 'var(--space-8)' }}>
-          <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--primary), var(--accent))', borderRadius: '8px', flexShrink: 0 }}></div>
-          <h1 className="text-xl">JobManager</h1>
+        <div className="flex items-center justify-between" style={{ marginBottom: 'var(--space-8)' }}>
+          <div className="flex items-center gap-2">
+            <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, var(--primary), var(--accent))', borderRadius: '8px', flexShrink: 0 }}></div>
+            <h1 className="text-xl">JobManager</h1>
+          </div>
+          <button
+            onClick={toggleTheme}
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              width: '36px',
+              height: '36px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '18px',
+              transition: 'all 0.2s',
+              flexShrink: 0
+            }}
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
         </div>
 
         <nav className="flex-col gap-2" style={{ flex: 1 }}>
