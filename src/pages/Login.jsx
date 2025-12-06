@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-    const { googleSignIn } = useAuth();
+    const { googleSignIn, authError } = useAuth();
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
@@ -39,7 +39,18 @@ export default function Login() {
                 <h2 style={{ marginBottom: '1.5rem', color: '#1a73e8' }}>Job Application Manager</h2>
                 <p style={{ marginBottom: '2rem', color: '#5f6368' }}>Sign in to manage your job search</p>
 
-                {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
+                {(error || authError) && (
+                    <div style={{
+                        color: 'white',
+                        backgroundColor: '#ef4444',
+                        padding: '12px',
+                        borderRadius: '6px',
+                        marginBottom: '1rem',
+                        fontSize: '14px'
+                    }}>
+                        {error || authError}
+                    </div>
+                )}
 
                 <button
                     onClick={handleGoogleSignIn}
